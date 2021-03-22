@@ -4,13 +4,19 @@ from category.models import *
 
 
 # Create your models here.
+class Image(models.Model):
+    id = models.AutoField(primary_key=True)
+    folder = models.TextField(default="")
+
+    class Meta:
+        db_table = 'image'
 
 
 class User(models.Model):
     uid = models.AutoField(primary_key=True)
     title = models.TextField(default="")
     intro = models.TextField(default="")
-    imageUrl = models.TextField(default="media/default_image.jpeg")
+    imageUrl = models.ForeignKey(Image, on_delete=models.CASCADE)
 
     numberOfEmploy = models.IntegerField(default=0)
 
@@ -29,13 +35,13 @@ class User(models.Model):
         db_table = 'users'
 
 
-class Photo(models.Model):
+class Detail_Image(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.ForeignKey(User, on_delete=models.CASCADE)
-    photo = models.TextField(default="")
+    folder = models.TextField(default="")
 
     class Meta:
-        db_table = 'photo'
+        db_table = 'detail_image'
 
 
 class Info(models.Model):

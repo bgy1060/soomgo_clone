@@ -21,6 +21,7 @@ from users import views as u
 from category import views as c
 from django.conf import settings
 from django.conf.urls.static import static
+from image import views as i
 
 
 urlpatterns = [
@@ -36,6 +37,8 @@ urlpatterns = [
     path('region/<str:region_name>', r.detail_region),
 
     path('info/<int:uid>',u.info_list),
+
+    path('media/<str:folder>/<str:file_name>', i.get_image),
 
     path('admin/', admin.site.urls),
 

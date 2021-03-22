@@ -16,12 +16,12 @@ class ReviewSimpleSerializer(serializers.ModelSerializer):
         )
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     avg_point = serializers.FloatField(required=False)
     total_review = serializers.IntegerField(required=False)
     recent_review = serializers.SerializerMethodField()
-    imageUrl = serializers.ImageField(use_url=True)
     total = serializers.SerializerMethodField()
+    imageUrl = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -36,6 +36,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             'recent_review',
             'total',
         )
+
+    def get_imageUrl(self, obj: User):
+        return obj.imageUrl.folder
 
     def get_recent_review(self, obj: User):
         last_review = obj.user_question.order_by('-id').first()
@@ -99,6 +102,16 @@ class QuestionSimpleSerializer(serializers.ModelSerializer):
         )
 
 
+class DetailImageSimpleSerializer(serializers.ModelSerializer):
+    folder_name = serializers.CharField(read_only=True, source='folder')
+
+    class Meta:
+        model = Detail_Image
+        fields = (
+            'folder_name',
+        )
+
+
 class InfoSerializer(serializers.ModelSerializer):
     avg_point = serializers.FloatField(required=False)
     total_review = serializers.IntegerField(required=False)
@@ -107,12 +120,15 @@ class InfoSerializer(serializers.ModelSerializer):
     offer_service = serializers.SerializerMethodField()
     review_info = serializers.SerializerMethodField()
     question = serializers.SerializerMethodField()
+    imageUrl = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'uid',
             'title',
+            'imageUrl',
             'category',
             'avg_point',
             'total_review',
@@ -120,9 +136,17 @@ class InfoSerializer(serializers.ModelSerializer):
             'detail_info',
             'offer_service',
             'detail_service',
+            'image',
             'review_info',
             'question',
         )
+
+    def get_imageUrl(self, obj: User):
+        return obj.imageUrl.folder
+
+    def get_image(self, obj: User):
+        image = obj.detail_image_set.all()
+        return DetailImageSimpleSerializer(image, many=True).data
 
     def get_category(self, obj: User):
         return obj.sub_category.sub_name
@@ -143,5 +167,3 @@ class InfoSerializer(serializers.ModelSerializer):
     def get_review_info(self, obj: User):
         review_info = obj.user_question.all()
         return Review2SimpleSerializer(review_info, many=True).data
-
-
