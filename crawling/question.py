@@ -7,7 +7,7 @@ driver = webdriver.Chrome(chromedriver)
 
 driver.get('https://soomgo.com/search/pro')
 
-for i in range(30):
+for i in range(1):
     title = driver.find_elements_by_css_selector("div.list-item a")
     title[i].click()
     time.sleep(1)
@@ -24,14 +24,13 @@ for i in range(30):
             print("끝")
             break
 
-    review = driver.find_elements_by_css_selector("ul.review-container div.profile-review-item")
-    for r in review:
-        author = r.find_element_by_css_selector("span.author").text
-        content = r.find_element_by_css_selector("div.collapsed-text-line.content").text
-        date = r.find_element_by_css_selector("span.date").text
-        print(author + "\n")
-        print(content + "\n")
-        print(date + "\n")
+    question = driver.find_elements_by_css_selector("div.profile-qna li")
+    for q in question:
+        question = q.find_element_by_css_selector("div.question").text
+        answer = q.find_element_by_css_selector("div.answer").text
+        print(question + "\n")
+        print(answer + "\n")
+
         print("=" * 30)
 
     driver.get('https://soomgo.com/search/pro')
