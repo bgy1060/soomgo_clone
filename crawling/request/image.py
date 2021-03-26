@@ -23,7 +23,7 @@ for i in range(1):
         i] + "?prev=searchPro&from=%EC%A7%80%EC%A0%95%EC%9A%94%EC%B2%AD%EC%84%9C")
     user_info_html = BeautifulSoup(user_info.text, "html.parser")
 
-    image_url = user_info_html.select("div.profile-media-list li")
+    image_url = user_info_html.select("div.profile-media-list")
     print(image_url)
     '''
     additional_info = user_info_html.select("div.profile-added-info li")
