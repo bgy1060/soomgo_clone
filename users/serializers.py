@@ -2,26 +2,28 @@ from abc import ABC
 
 from rest_framework import serializers
 from .models import *
+from django.db.models import Avg, Max, Min, Sum, Count
 
 
 class ReviewSimpleSerializer(serializers.ModelSerializer):
-    reviewer = serializers.CharField(read_only=True, source='reviewer.title')
+    reviewer_name = serializers.CharField(read_only=True, source='reviewer')
     description = serializers.CharField(source='Content')
 
     class Meta:
         model = Review
         fields = (
-            'reviewer',
+            'id',
+            'reviewer_name',
             'description',
         )
 
 
 class UserSerializer(serializers.ModelSerializer):
-    avg_point = serializers.FloatField(required=False)
-    total_review = serializers.IntegerField(required=False)
+    avg_point = serializers.SerializerMethodField()
+    total_review = serializers.SerializerMethodField()
     recent_review = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
-    imageUrl = serializers.SerializerMethodField()
+
 
     class Meta:
         model = User
@@ -37,12 +39,15 @@ class UserSerializer(serializers.ModelSerializer):
             'total',
         )
 
-    def get_imageUrl(self, obj: User):
-        return obj.imageUrl.folder
-
     def get_recent_review(self, obj: User):
-        last_review = obj.user_question.order_by('-id').first()
+        last_review = obj.user_question.order_by('id').first()
         return ReviewSimpleSerializer(last_review).data
+
+    def get_avg_point(self,obj : User):
+        return obj.user_question.values('uid').aggregate(Avg('point'))
+
+    def get_total_review(selfs,obj:User):
+        return obj.user_question.values('uid').aggregate(Count('id'))
 
     def get_total(self, obj : User):
         return User.objects.all().count()
@@ -72,7 +77,7 @@ class ServiceSimpleSerializer(serializers.ModelSerializer):
 
 
 class Review2SimpleSerializer(serializers.ModelSerializer):
-    reviewer = serializers.CharField(read_only=True, source='reviewer.title')
+    reviewer_name = serializers.CharField(read_only=True, source='reviewer')
     review_point = serializers.IntegerField(read_only=True, source='point')
     review_content = serializers.CharField(read_only=True, source='Content')
     reviewresponse = serializers.CharField(read_only=True, source='reviewResponse')
@@ -81,7 +86,7 @@ class Review2SimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Info
         fields = (
-            'reviewer',
+            'reviewer_name',
             'review_point',
             'review_content',
             'reviewresponse',
@@ -120,7 +125,6 @@ class InfoSerializer(serializers.ModelSerializer):
     offer_service = serializers.SerializerMethodField()
     review_info = serializers.SerializerMethodField()
     question = serializers.SerializerMethodField()
-    imageUrl = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     class Meta:
@@ -141,8 +145,6 @@ class InfoSerializer(serializers.ModelSerializer):
             'question',
         )
 
-    def get_imageUrl(self, obj: User):
-        return obj.imageUrl.folder
 
     def get_image(self, obj: User):
         image = obj.detail_image_set.all()

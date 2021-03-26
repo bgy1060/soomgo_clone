@@ -13,8 +13,8 @@ import re
 
 def region_user(request, region_name):
     if region_name == '전국':
-        query_set = User.objects.prefetch_related('user_question', 'reviewer_question'). \
-            annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).all()
+        query_set = User.objects.prefetch_related('user_question'). \
+                annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).all()
 
     else:
         if re.search(r'전체', region_name):
@@ -71,71 +71,51 @@ def region_cat_user(request, region_name, cat_name):
     cat_name = cat_name.replace('-', '/')
     if region_name == '전국' or cat_name == '서비스 전체':
         if region_name == '전국' and cat_name == '서비스 전체':
-            query_set = User.objects.prefetch_related('user_question'). \
-                annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).all()
+            query_set = User.objects.prefetch_related('user_question').all()
         elif region_name == '전국' and not (cat_name == '서비스 전체'):
             if re.search(r'전체', cat_name):
                 cat_name = cat_name[:-2].strip()
-                check = Category.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')) \
-                    .filter(name=cat_name)
+                check = Category.objects.prefetch_related('user_question').filter(name=cat_name)
                 if check.exists():
                     cat_id = Category.objects.get(name=cat_name)
-                    query_set = User.objects.prefetch_related('user_question'). \
-                        annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')). \
-                        filter(category=cat_id)
+                    query_set = User.objects.prefetch_related('user_question').filter(category=cat_id)
 
                 else:
                     detail_cat_id = DetailCategory.objects.get(detail_name=cat_name)
-                    query_set = User.objects.prefetch_related('user_question'). \
-                        annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).filter(
-                        detail_category=detail_cat_id)
+                    query_set = User.objects.prefetch_related('user_question').filter(detail_category=detail_cat_id)
             else:
                 sub_cat_id = SubCategory.objects.get(sub_name=cat_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')). \
-                    filter(sub_category=sub_cat_id)
+                query_set = User.objects.prefetch_related('user_question').filter(sub_category=sub_cat_id)
         else :
             if re.search(r'전체', region_name):
                 region_name = region_name[:2]
                 region_id = Region.objects.get(name=region_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')). \
-                    filter(region=region_id)
+                query_set = User.objects.prefetch_related('user_question').filter(region=region_id)
             else:
                 detail_region_id = DetailRegion.objects.get(detail_name=region_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')). \
-                    filter(detail_region=detail_region_id)
+                query_set = User.objects.prefetch_related('user_question').filter(detail_region=detail_region_id)
 
     else:
         if re.search(r'전체', region_name) and re.search(r'전체', cat_name):
             cat_name = cat_name[:-2].strip()
-            check = Category.objects.prefetch_related('user_question'). \
-                annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                filter(name=cat_name)
+            check = Category.objects.prefetch_related('user_question').filter(name=cat_name)
             if check.exists():
                 cat_id = Category.objects.get(name=cat_name)
                 region_name = region_name[:2]
                 region_id = Region.objects.get(name=region_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                    filter(region=region_id, category=cat_id)
+                query_set = User.objects.prefetch_related('user_question').filter(region=region_id, category=cat_id)
             else:
                 region_name = region_name[:2]
                 region_id = Region.objects.get(name=region_name)
                 detail_cat_id = DetailCategory.objects.get(detail_name=cat_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                    filter(region=region_id, detail_category=detail_cat_id)
+                query_set = User.objects.prefetch_related('user_question').filter(region=region_id,
+                                                                                  detail_category=detail_cat_id)
 
         elif re.search(r'전체', region_name) and not (re.search(r'전체', cat_name)):
             region_name = region_name[:2]
             region_id = Region.objects.get(name=region_name)
             sub_cat_id = SubCategory.objects.get(sub_name=cat_name)
-            query_set = User.objects.prefetch_related('user_question'). \
-                annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                filter(region=region_id, sub_category=sub_cat_id)
+            query_set = User.objects.prefetch_related('user_question').filter(region=region_id, sub_category=sub_cat_id)
 
         elif not (re.search(r'전체', region_name)) and re.search(r'전체', cat_name):
             cat_name = cat_name[:-2].strip()
@@ -143,23 +123,20 @@ def region_cat_user(request, region_name, cat_name):
             if check.exists():
                 detail_region_id = DetailRegion.objects.get(detail_name=region_name)
                 cat_id = Category.objects.get(name=cat_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                    filter(detail_region=detail_region_id, category=cat_id)
+                query_set = User.objects.prefetch_related('user_question').filter(detail_region=detail_region_id,
+                                                                                  category=cat_id)
 
             else:
                 detail_region_id = DetailRegion.objects.get(detail_name=region_name)
                 detail_cat_id = DetailCategory.objects.get(detail_name=cat_name)
-                query_set = User.objects.prefetch_related('user_question'). \
-                    annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                    filter(detail_region=detail_region_id, detail_category=detail_cat_id)
+                query_set = User.objects.prefetch_related('user_question').filter(detail_region=detail_region_id,
+                                                                                  detail_category=detail_cat_id)
 
         else:
             detail_region_id = DetailRegion.objects.get(detail_name=region_name)
             sub_cat_id = SubCategory.objects.get(sub_name=cat_name)
-            query_set = User.objects.prefetch_related('user_question'). \
-                annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).\
-                filter(detail_region=detail_region_id, sub_category=sub_cat_id)
+            query_set = User.objects.prefetch_related('user_question').filter(detail_region=detail_region_id,
+                                                                              sub_category=sub_cat_id)
 
     serializer = UserSerializer(query_set, many=True)
     return JsonResponse(serializer.data, safe=False)
@@ -168,7 +145,7 @@ def region_cat_user(request, region_name, cat_name):
 # Create your views here.
 @csrf_exempt
 def info_list(request, uid):
-    query_set = User.objects.prefetch_related('user_question', 'reviewer_question').select_related('sub_category').\
+    query_set = User.objects.prefetch_related('user_question').select_related('sub_category').\
         annotate(total_review=Count('user_question__id'), avg_point=Avg('user_question__point')).filter(uid=uid)
     serializer = InfoSerializer(query_set, many=True)
     return JsonResponse(serializer.data, safe=False)

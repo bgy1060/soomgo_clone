@@ -13,10 +13,10 @@ class Image(models.Model):
 
 
 class User(models.Model):
-    uid = models.AutoField(primary_key=True)
+    uid = models.IntegerField(primary_key=True)
     title = models.TextField(default="")
     intro = models.TextField(default="")
-    imageUrl = models.ForeignKey(Image, on_delete=models.CASCADE)
+    imageUrl = models.TextField(default="")
 
     numberOfEmploy = models.IntegerField(default=0)
 
@@ -66,7 +66,7 @@ class Service(models.Model):
 class Review(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_question')
-    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer_question')
+    reviewer = models.TextField(default="")
     point = models.IntegerField(default=0)
     Content = models.TextField(default="")
     reviewResponse = models.TextField(default="")
